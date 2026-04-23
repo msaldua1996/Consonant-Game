@@ -3,54 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Consonant Whack-a-Mole</title>
+    <title>My Classroom Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f0f8ff; }
+        :root {
+            --primary: #4a90e2;
+            --secondary: #f39c12;
+            --bg: #f4f7f6;
+        }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Screen Management */
+        .screen { display: none; flex: 1; padding: 20px; text-align: center; overflow-y: auto; }
+        .active { display: block; }
+
+        /* Navigation Bar */
+        nav { background: #333; color: white; display: flex; justify-content: space-around; padding: 15px 0; position: fixed; bottom: 0; width: 100%; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); }
+        nav button { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        nav button:hover { color: var(--secondary); transform: scale(1.1); }
+
+        /* Timer Styles */
+        #timer-display { font-size: 5rem; margin: 20px 0; color: var(--primary); font-weight: bold; }
+        .controls button { padding: 10px 20px; font-size: 1rem; border-radius: 5px; border: none; background: var(--primary); color: white; cursor: pointer; }
+
+        /* Whack-a-Mole Styles */
         .grid { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; justify-content: center; margin-top: 20px; }
         .hole { width: 100px; height: 100px; background: #8b4513; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; cursor: pointer; position: relative; overflow: hidden; }
-        .mole { width: 80px; height: 80px; background: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: absolute; bottom: -100%; transition: bottom 0.2s; color: #333; }
+        .mole { width: 80px; height: 80px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: absolute; bottom: -100%; transition: bottom 0.2s; color: #333; }
         .mole.up { bottom: 10px; }
     </style>
 </head>
 <body>
-    <h1>Whack the Consonant!</h1>
-    <p>Score: <span id="score">0</span></p>
-    <div class="grid">
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
-        <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+
+    <div id="study" class="screen active">
+        <h1>📚 Today's Lesson: Consonants</h1>
+        <p>Consonants are letters that are NOT vowels (A, E, I, O, U).</p>
+        <div style="background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="color: var(--primary);">B C D F G H J K L M N P Q R S T V W X Y Z</h2>
+        </div>
+        <p style="margin-top:20px;">Can you find these letters in the game?</p>
     </div>
 
+    <div id="game" class="screen">
+        <h1>Whack the Consonant!</h1>
+        <p>Score: <span id="score">0</span></p>
+        <div class="grid">
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+            <div class="hole"><div class="mole" onclick="whack(this)"></div></div>
+        </div>
+    </div>
+
+    <div id="timer" class="screen">
+        <h1>⏲️ Classroom Timer</h1>
+        <div id="timer-display">01:00</div>
+        <div class="controls">
+            <button onclick="startTimer()">Start 1 Min</button>
+            <button onclick="resetTimer()" style="background:#e74c3c;">Reset</button>
+        </div>
+    </div>
+
+    <nav>
+        <button onclick="showScreen('study')">📖 Study</button>
+        <button onclick="showScreen('game')">🎮 Game</button>
+        <button onclick="showScreen('timer')">⏳ Timer</button>
+    </nav>
+
     <script>
+        // NAVIGATION LOGIC
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // TIMER LOGIC
+        let timeLeft = 60;
+        let timerId;
+        function startTimer() {
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                if(timeLeft <= 0) {
+                    clearInterval(timerId);
+                    alert("Time is up!");
+                } else {
+                    timeLeft--;
+                    let mins = Math.floor(timeLeft / 60);
+                    let secs = timeLeft % 60;
+                    document.getElementById('timer-display').textContent = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+        function resetTimer() {
+            clearInterval(timerId);
+            timeLeft = 60;
+            document.getElementById('timer-display').textContent = "01:00";
+        }
+
+        // GAME LOGIC
         const scoreBoard = document.getElementById('score');
         const moles = document.querySelectorAll('.mole');
         const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
         let score = 0;
 
-        function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
-        function randomMole() { const idx = Math.floor(Math.random() * moles.length); return moles[idx]; }
-
         function peep() {
-            const time = randomTime(600, 1200);
-            const mole = randomMole();
+            const time = Math.random() * (1200 - 600) + 600;
+            const mole = moles[Math.floor(Math.random() * moles.length)];
             mole.textContent = consonants[Math.floor(Math.random() * consonants.length)];
             mole.classList.add('up');
             setTimeout(() => {
                 mole.classList.remove('up');
-                peep();
+                if(document.getElementById('game').classList.contains('active')) peep();
             }, time);
         }
-
         function whack(e) {
             score++;
             e.classList.remove('up');
             scoreBoard.textContent = score;
         }
-
-        peep();
+        peep(); // Start the game loop
     </script>
 </body>
 </html>
